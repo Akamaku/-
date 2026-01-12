@@ -50,16 +50,13 @@
       border-radius: 50%; border: none;
       color: #fff; font-size: 11px; cursor: pointer;
       position: absolute; 
-      bottom: 145px;
+      bottom: 145px; /* 配置場所は維持 */
       box-shadow: 0 4px 8px rgba(0,0,0,0.2);
     }
     .btn-back-manual { background: #555; left: 100px; }
     .btn-stop-manual { background: #222; right: 100px; }
 
     .start-label { position: absolute; top: 355px; left: 50%; transform: translateX(-50%); font-size: 18px; letter-spacing: 0.4em; }
-
-    .spot-row-bottom { position: absolute; bottom: 80px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; }
-    .spot-btn { width: 52px; height: 52px; border-radius: 50%; border: none; background: #111; color: #fff; font-size: 10px; cursor: pointer; }
     
     .footer-bar { position: absolute; bottom: 0; left: 0; width: 100%; height: 48px; background: #3b7dff; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 14px; }
   </style>
@@ -78,13 +75,6 @@
     <button class="btn-side btn-back-manual" onclick="prev()">戻し</button>
     <button class="btn-side btn-stop-manual" onclick="stopBroadcasting()">停止</button>
 
-    <div class="spot-row-bottom">
-      <button class="spot-btn" onclick="spot('1')">遅延<br>(1)</button>
-      <button class="spot-btn" onclick="spot('2')">足元<br>(2)</button>
-      <button class="spot-btn" onclick="spot('3')">優先<br>(3)</button>
-      <button class="spot-btn" onclick="spot('4')">料金<br>(4)</button>
-    </div>
-
     <div class="footer-bar" id="status">系統待機中</div>
   </div>
 
@@ -100,6 +90,9 @@
       ],
       "801": [       
         "0-直通K03復路.wav", "1-直通K03復路.wav", "2-直通K03復路.wav", "3-直通K03復路.wav", "4-直通K03復路.wav"
+      ],
+       "260": [       
+        "0-直通22.m4a", "1-直通22.wav"
       ]
     };
 
@@ -133,7 +126,7 @@
     function next() {
       if (currentRoute.length === 0) return;
 
-      // 【修正】181番限定のスキップ処理 (「再生中」の時だけ発動)
+      // 181番限定スキップ処理 (再生中の場合)
       if (currentSystemNum === "181" && !player.paused) {
         if (currentIndex === 1 || currentIndex === 9) {
           if (currentIndex < currentRoute.length - 2) {
@@ -145,8 +138,7 @@
         }
       }
 
-      // 通常の「次へ」進行
-      // 停止中（player.paused）であっても、ここを通ることで次のインデックスへ進みます
+      // 通常の進行（停止中であれば次の放送に進む）
       if (currentIndex < currentRoute.length - 1) {
         currentIndex++;
         updateDisplay();
@@ -188,12 +180,6 @@
       player.play().catch(e => console.error("再生失敗:", fileName, e));
     }
 
-    function spot(key) {
-      const names = { '1': 'chien', '2': 'ashimoto', '3': 'yusen', '4': 'ryokin' };
-      const a = new Audio(`spot/${names[key]}.wav`);
-      a.play().catch(e => console.error("Spot error"));
-    }
-
     window.addEventListener("keydown", (e) => {
       if (document.activeElement.tagName === 'INPUT') {
         if (e.key === "Enter") setRoute();
@@ -202,7 +188,7 @@
       if (e.key === "Enter") { e.preventDefault(); next(); }
       if (e.key === "Backspace") { e.preventDefault(); prev(); }
       if (e.key === " ") { e.preventDefault(); stopBroadcasting(); }
-      if (['1','2','3','4'].includes(e.key)) spot(e.key);
+      // 数字キーによる啓発放送のイベントリスナーも削除
     });
   </script>
 </body>
